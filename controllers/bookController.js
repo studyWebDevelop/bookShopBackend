@@ -2,10 +2,20 @@ const con = require("../mariadb");
 const { StatusCodes } = require("http-status-codes");
 
 const getBooks = (req, res, next) => {
-  const { category_id } = req.query;
-  const sql = category_id
-    ? "SELECT * FROM books WHERE category_id = ?"
-    : "SELECT * FROM books";
+  const { category_id, newBooks } = req.query;
+
+  let sql = "SELECT * FROM books";
+
+  if (category_id && newBooks) {
+    sql +=
+      " LEFT JOIN category ON books.category_id = category.id WHERE category_id = ? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW();";
+  } else if (newBooks) {
+    sql +=
+      " WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW();";
+  } else if (category_id) {
+    sql +=
+      " LEFT JOIN category ON books.category_id = category.id WHERE category_id = ?";
+  }
 
   con.query(sql, [category_id], (err, results) => {
     if (err) return next(err);
@@ -22,7 +32,7 @@ const getBooks = (req, res, next) => {
 
 const getBookById = (req, res) => {
   const { id } = Number(req.params);
-  const sql = "SELECT * FROM books WHERE id = ?";
+  const sql = " WHERE id = ?";
 
   con.query(sql, [id], (err, results) => {
     if (err) return next(err);
