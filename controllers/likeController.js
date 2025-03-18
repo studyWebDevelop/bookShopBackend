@@ -18,7 +18,7 @@ const deleteLike = (req, res, next) => {
   const { user_id } = req.body;
   const { id } = req.params;
 
-  let sql = "DELETE FROM likes where liked_book_id = ? AND user_id = ?;";
+  let sql = "DELETE FROM likes WHERE liked_book_id = ? AND user_id = ?;";
 
   con.query(sql, [user_id, id], (err, results) => {
     if (err) return next(err);
