@@ -1,4 +1,4 @@
-const con = require("../mariadb");
+const { asyncConnection } = require("../mariadb");
 const { StatusCodes } = require("http-status-codes");
 
 const postOrders = async (req, res, next) => {
@@ -9,7 +9,7 @@ const postOrders = async (req, res, next) => {
     let sql =
       "INSERT INTO delivery(address, receiver, contact) VALUES(?, ?, ?);";
 
-    const [delivery_result] = await con.query(sql, [
+    const [delivery_result] = await asyncConnection.query(sql, [
       delivery.address,
       delivery.receiver,
       delivery.contact,
@@ -20,7 +20,7 @@ const postOrders = async (req, res, next) => {
     sql = `INSERT INTO orders(book_title, total_quantity, total_price, user_id, delivery_id)
            VALUES(?, ?, ?, ?, ?);`;
 
-    const [order_result] = await con.query(sql, [
+    const [order_result] = await asyncConnection.query(sql, [
       bookTitle,
       totalQuantity,
       totalPrice,
@@ -38,7 +38,7 @@ const postOrders = async (req, res, next) => {
       quantity,
     ]);
 
-    await con.query(sql, [sqlValues]);
+    await asyncConnection.query(sql, [sqlValues]);
 
     let results = await deleteCartItems(con, items);
 
@@ -51,14 +51,14 @@ const postOrders = async (req, res, next) => {
 const deleteCartItems = async (con, items) => {
   let sql = "delete from cartItems where id in (?)";
 
-  return con.query(sql, [items]);
+  return asyncConnection.query(sql, [items]);
 };
 
 const getOrders = async (req, res, next) => {
   let sql = `select orders.id, created_at, address, receiver, contact, book_title, total_quantity, total_price from orders 
              left join delivery on orders.delivery_id = delivery.id;`;
 
-  const [row, fields] = await con.query(sql);
+  const [row, fields] = await asyncConnection.query(sql);
 
   res.status(StatusCodes.OK).json(row);
 };
@@ -69,7 +69,7 @@ const getOrderDetail = async (req, res, next) => {
   let sql = `select book_id, title, author, price, quantity from orderedBook
              left join books on orderedBook.book_id = books.id where order_id = ?;`;
 
-  const [row, fields] = await con.query(sql, [id]);
+  const [row, fields] = await asyncConnection.query(sql, [id]);
 
   res.status(StatusCodes.OK).json(row);
 };

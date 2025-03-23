@@ -1,4 +1,4 @@
-const con = require("../mariadb");
+const { syncConnection } = require("../mariadb");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto"); // 암호화
 const { StatusCodes } = require("http-status-codes");
@@ -14,7 +14,7 @@ const join = (req, res, next) => {
 
   const sql = "INSERT INTO users(email, password, salt) VALUES (? , ?, ?)";
 
-  con.query(sql, [email, hashedPassword, salt], (err) => {
+  syncConnection.query(sql, [email, hashedPassword, salt], (err) => {
     if (err) return next(err);
 
     res.status(StatusCodes.CREATED).json({ message: `${email}님 환영합니다!` });
@@ -26,7 +26,7 @@ const login = (req, res, next) => {
 
   const sql = "SELECT * FROM users WHERE email = ?";
 
-  con.query(sql, [email, password], (err, results) => {
+  syncConnection.query(sql, [email, password], (err, results) => {
     if (err) return next(err);
 
     const loginUser = results[0];
@@ -68,7 +68,7 @@ const requestPasswordReset = (req, res, next) => {
 
   const sql = "SELECT * FROM users WHERE email = ?";
 
-  con.query(sql, [email], (err, results) => {
+  syncConnection.query(sql, [email], (err, results) => {
     if (err) return next(err);
 
     const user = results[0];
@@ -91,7 +91,7 @@ const passwordReset = (req, res, next) => {
 
   const sql = "UPDATE users SET password = ?, salt = ? WHERE email = ?";
 
-  con.query(sql, [hashedPassword, salt, email], (err, results) => {
+  syncConnection.query(sql, [hashedPassword, salt, email], (err, results) => {
     if (err) return next(err);
 
     if (results.affectedRows == 0) {

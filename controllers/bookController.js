@@ -1,4 +1,4 @@
-const con = require("../mariadb");
+const { syncConnection } = require("../mariadb");
 const { StatusCodes } = require("http-status-codes");
 
 const getBooks = (req, res, next) => {
@@ -26,7 +26,7 @@ const getBooks = (req, res, next) => {
     sqlValues.push(Number(limit), Number(currentPage - 1) * Number(limit));
   }
 
-  con.query(sql, sqlValues, (err, results) => {
+  syncConnection.query(sql, sqlValues, (err, results) => {
     if (err) return next(err);
 
     if (results.length === 0) {
@@ -48,17 +48,21 @@ const getBookById = (req, res, next) => {
     (select count(*) from likes where liked_book_id  = ?) as likes 
     from books LEFT JOIN category ON books.category_id = category.category_id WHERE books.id = ?;`;
 
-  con.query(sql, [user_id, Number(id), Number(id)], (err, results) => {
-    if (err) return next(err);
+  syncConnection.query(
+    sql,
+    [user_id, Number(id), Number(id)],
+    (err, results) => {
+      if (err) return next(err);
 
-    if (results.length == 0) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "존재하지 않는 도서입니다." });
+      if (results.length == 0) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "존재하지 않는 도서입니다." });
+      }
+
+      res.status(StatusCodes.OK).json(results[0]);
     }
-
-    res.status(StatusCodes.OK).json(results[0]);
-  });
+  );
 };
 
 module.exports = { getBooks, getBookById };

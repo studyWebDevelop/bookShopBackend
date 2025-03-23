@@ -1,4 +1,4 @@
-const con = require("../mariadb");
+const { syncConnection } = require("../mariadb");
 const { StatusCodes } = require("http-status-codes");
 
 const getCartsItems = (req, res, next) => {
@@ -13,7 +13,7 @@ const getCartsItems = (req, res, next) => {
     sqlValues.push(selected_items_id);
   }
 
-  con.query(sql, sqlValues, (err, results) => {
+  syncConnection.query(sql, sqlValues, (err, results) => {
     if (err) return next(err);
 
     res.status(StatusCodes.OK).json(results);
@@ -25,7 +25,7 @@ const addCartItems = (req, res, next) => {
 
   let sql =
     "insert into cartItems(book_id, quantity, user_id) values (?, ?, ?)";
-  con.query(
+  syncConnection.query(
     sql,
     [Number(book_id), Number(quantity), Number(user_id)],
     (err, results) => {
@@ -40,7 +40,7 @@ const deleteCartItems = (req, res, next) => {
   const { id } = req.params;
 
   let sql = "delete from cartItems where id = ?";
-  con.query(sql, [id], (error, results) => {
+  syncConnection.query(sql, [id], (error, results) => {
     if (error) return next(error);
 
     res.status(StatusCodes.OK).json(results);

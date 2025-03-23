@@ -1,4 +1,4 @@
-const con = require("../mariadb");
+const { syncConnection } = require("../mariadb");
 const { StatusCodes } = require("http-status-codes");
 
 const postLike = (req, res, next) => {
@@ -7,7 +7,7 @@ const postLike = (req, res, next) => {
 
   let sql = "INSERT INTO likes (user_id, liked_book_id) VALUES (?, ?);";
 
-  con.query(sql, [user_id, id], (err, results) => {
+  syncConnection.query(sql, [user_id, id], (err, results) => {
     if (err) return next(err);
 
     return res.status(StatusCodes.OK).json(results);
@@ -20,7 +20,7 @@ const deleteLike = (req, res, next) => {
 
   let sql = "DELETE FROM likes WHERE liked_book_id = ? AND user_id = ?;";
 
-  con.query(sql, [user_id, id], (err, results) => {
+  syncConnection.query(sql, [user_id, id], (err, results) => {
     if (err) return next(err);
 
     return res.status(StatusCodes.OK).json(results);
