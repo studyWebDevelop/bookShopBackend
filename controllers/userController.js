@@ -43,10 +43,10 @@ const login = (req, res, next) => {
 
     if (loginUser.password === hashedPassword) {
       const jwt_token = jwt.sign(
-        { email: loginUser.email },
+        { id: loginUser.id, email: loginUser.email },
         process.env.JWT_PK,
         {
-          expiresIn: "2h",
+          expiresIn: "1m",
         }
       );
 
