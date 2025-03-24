@@ -1,10 +1,26 @@
 const { asyncConnection } = require("../mariadb");
 const { StatusCodes } = require("http-status-codes");
+const jwt = require("jsonwebtoken");
 
 const postOrders = async (req, res, next) => {
   try {
-    const { items, delivery, totalQuantity, totalPrice, userId, bookTitle } =
-      req.body;
+    const authorization = decodeJwt(req, res);
+
+    if (authorization instanceof jwt.TokenExpiredError) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "로그인 세션이 만료되었습니다. 다시 로그인 해주세요.",
+      });
+    }
+
+    if (authorization instanceof jwt.JsonWebTokenError) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "잘못된 형식의 토큰입니다.",
+      });
+    }
+
+    const userId = authorization.id;
+
+    const { items, delivery, totalQuantity, totalPrice, bookTitle } = req.body;
 
     let sql =
       "INSERT INTO delivery(address, receiver, contact) VALUES(?, ?, ?);";

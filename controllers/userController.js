@@ -46,7 +46,7 @@ const login = (req, res, next) => {
         { id: loginUser.id, email: loginUser.email },
         process.env.JWT_PK,
         {
-          expiresIn: "1m",
+          expiresIn: "2h",
         }
       );
 
